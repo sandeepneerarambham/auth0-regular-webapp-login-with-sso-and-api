@@ -1,0 +1,75 @@
+extends layout
+
+block content
+  br
+  .w3-container
+    .w3-card-4.w3-center(style="padding: 15px;")
+      img(src=user.picture)
+      p Welcome #{user.nickname}
+      div
+        button(id="get-profile") Get Profile
+        button(id="get-contacts") List Contacts
+        button(id="get-appointments") List Appointments
+        div(id="results")
+          pre
+  script.
+    const auth0js = new auth0.WebAuth({
+      domain: '#{env.AUTH0_DOMAIN}',
+      clientID: '#{env.AUTH0_CLIENT_ID}',
+      redirectUri: '#{env.AUTH0_CALLBACK_URL}',
+      responseType: 'code',
+      audience: 'https://#{env.AUTH0_DOMAIN}/userinfo',
+      scope: 'openid profile email'
+    });
+    function checkSession () {
+      auth0js.checkSession({
+        responseType: 'token id_token',
+        scope: 'openid profile email',
+        connection: '#{env.AUTH0_CONNECTION}',
+        redirectUri: '#{env.AUTH0_CALLBACK_URL}',
+        timeout: 5000,
+        usePostMessage: true
+      }, function (err, result) {
+        if (err) {
+          console.log(`checkSession failed (${err.error}). Redirecting to login page...`);
+          window.location = '#{env.LOGOUT_URL}';
+        }
+      });
+    }
+    setInterval(function() {
+      // periodically check once a minute for SSO status
+      checkSession();
+    }, 60000);
+
+    $('#get-profile').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "http://app1.com:3000/api/userinfo",
+        method: "GET",
+        success: function (data) {
+          $('#results pre').text(JSON.stringify(data, null, 2))
+        }
+      });
+    });
+
+    $('#get-appointments').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "http://app1.com:3000/api/appointments",
+        method: "GET",
+        success: function (data) {
+          $('#results pre').text(JSON.stringify(data, null, 2))
+        }
+      });
+    });
+
+    $('#get-contacts').on('click', function(e) {
+      e.preventDefault();
+      $.ajax({
+        url: "http://app1.com:3000/api/contacts",
+        method: "GET",
+        success: function (data) {
+          $('#results pre').text(JSON.stringify(data, null, 2))
+        }
+      });
+    });
