@@ -49,8 +49,8 @@ router.get('/logout', function (req, res) {
 router.get('/callback',
   passport.authenticate('auth0', { failureRedirect: '/failure' }),
   function (req, res) {
-    res.redirect(req.session.returnTo || '/user');
-    // res.redirect('/user');
+    // res.redirect(req.session.returnTo || '/user');
+    res.redirect('/user');
   });
 
 router.get('/failure', function (req, res) {
